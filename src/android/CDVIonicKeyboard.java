@@ -11,6 +11,7 @@ import org.json.JSONException;
 
 import android.content.Context;
 import android.graphics.Rect;
+import android.os.Build;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -62,6 +63,8 @@ public class CDVIonicKeyboard extends CordovaPlugin {
             return true;
         }
         if ("init".equals(action)) {
+            final Activity activity = cordova.getActivity();
+            final Window window = activity.getWindow();
             cordova.getThreadPool().execute(new Runnable() {
                 public void run() {
                 	//calculate density-independent pixels (dp)
@@ -93,35 +96,33 @@ public class CDVIonicKeyboard extends CordovaPlugin {
 
                             // calculate screen height differently for android versions >= 21: Lollipop 5.x, Marshmallow 6.x
                             //http://stackoverflow.com/a/29257533/3642890 beware of nexus 5
-                            int screenHeight;
-
-                            if (Build.VERSION.SDK_INT >= 21) {
-                                Display display = cordova.getActivity().getWindowManager().getDefaultDisplay();
-                                Point size = new Point();
-                                display.getSize(size);
-                                screenHeight = size.y;
-                            } else {
-                                screenHeight = rootViewHeight;
-                            }
-
+                            int screenHeight = getScreenHeight();
                             int heightDiff = screenHeight - resultBottom;
 
                             int pixelHeightDiff = (int)(heightDiff / density);
                             if (pixelHeightDiff > 100 && pixelHeightDiff != previousHeightDiff) { // if more than 100 pixels, its probably a keyboard...
+                                showNavigationBar();
+                                screenHeight = getScreenHeight();
+                                heightDiff = screenHeight - resultBottom;
+                                pixelHeightDiff = (int)(heightDiff / density);
                                 String msg = "S" + Integer.toString(pixelHeightDiff);
                                 result = new PluginResult(PluginResult.Status.OK, msg);
                                 result.setKeepCallback(true);
                                 callbackContext.sendPluginResult(result);
                             }
                             else if ( pixelHeightDiff != previousHeightDiff && ( previousHeightDiff - pixelHeightDiff ) > 100 ){
-                            	String msg = "H";
+                                hideNavigationBar();
+                                screenHeight = getScreenHeight();
+                                heightDiff = screenHeight - resultBottom;
+                                pixelHeightDiff = (int)(heightDiff / density);
+                                String msg = "H";
                                 result = new PluginResult(PluginResult.Status.OK, msg);
                                 result.setKeepCallback(true);
                                 callbackContext.sendPluginResult(result);
                             }
                             previousHeightDiff = pixelHeightDiff;
                         }
-
+                        
                         private void possiblyResizeChildOfContent() {
                             int usableHeightNow = computeUsableHeight();
                             if (usableHeightNow != usableHeightPrevious) {
@@ -136,14 +137,44 @@ public class CDVIonicKeyboard extends CordovaPlugin {
                                 usableHeightPrevious = usableHeightNow;
                             }
                         }
-
+                        
                         private int computeUsableHeight() {
                             Rect r = new Rect();
                             mChildOfContent.getWindowVisibleDisplayFrame(r);
                             return (r.bottom - r.top);
                         }
-                    };
+                        
+                        private int getScreenHeight() {
+                            int rootViewHeight = rootView.getRootView().getHeight();
+                            if (Build.VERSION.SDK_INT >= 21) {
+                                Display display = cordova.getActivity().getWindowManager().getDefaultDisplay();
+                                Point size = new Point();
+                                display.getSize(size);
+                                return size.y;
+                            } else {
+                                return rootViewHeight;
+                            }
+                        }
 
+                        private void showNavigationBar() {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                                int uiOptions = window.getDecorView().getSystemUiVisibility();
+                                uiOptions &= ~View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
+                                uiOptions &= ~View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+                                window.getDecorView().setSystemUiVisibility(uiOptions);
+                            }
+                        }
+
+                        private void hideNavigationBar() {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                                final int uiOptions = window.getDecorView().getSystemUiVisibility()
+                                    | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                                    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+                                window.getDecorView().setSystemUiVisibility(uiOptions);
+                            }
+                        }
+                    };
+                    
                     mChildOfContent = content.getChildAt(0);
                     rootView.getViewTreeObserver().addOnGlobalLayoutListener(list);
                     frameLayoutParams = (FrameLayout.LayoutParams) mChildOfContent.getLayoutParams();

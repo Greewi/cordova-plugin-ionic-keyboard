@@ -162,12 +162,12 @@ public class CDVIonicKeyboard extends CordovaPlugin {
                             hideNavigationBar();
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                                 int uiOptions = window.getDecorView().getSystemUiVisibility();
-                                uiOption &= ~View.SYSTEM_UI_FLAG_LAYOUT_STABLE;
-                                uiOption &= ~View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
-                                uiOption &= ~View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
-                                uiOption &= ~View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
-                                uiOption &= ~View.SYSTEM_UI_FLAG_FULLSCREEN;
-                                uiOption &= ~View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+                                uiOptions &= ~View.SYSTEM_UI_FLAG_LAYOUT_STABLE;
+                                uiOptions &= ~View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
+                                uiOptions &= ~View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
+                                uiOptions &= ~View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
+                                uiOptions &= ~View.SYSTEM_UI_FLAG_FULLSCREEN;
+                                uiOptions &= ~View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
                                 window.getDecorView().setSystemUiVisibility(uiOptions);
                             }
                         }

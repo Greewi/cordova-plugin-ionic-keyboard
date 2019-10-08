@@ -23,6 +23,7 @@ import android.view.inputmethod.InputMethodManager;
 // import additionally required classes for calculating screen height
 import android.view.Display;
 import android.view.DisplayCutout;
+import android.view.WindowManager;
 import android.graphics.Point;
 import android.os.Build;
 import android.widget.FrameLayout;
@@ -150,17 +151,21 @@ public class CDVIonicKeyboard extends CordovaPlugin {
                         private int getScreenHeight() {
                             int rootViewHeight = rootView.getRootView().getHeight();
                             if (Build.VERSION.SDK_INT >= 21) {
-                                Display display = cordova.getActivity().getWindowManager().getDefaultDisplay();
+//                                Display display = cordova.getActivity().getWindowManager().getDefaultDisplay();
+                                WindowManager windowManager = (WindowManager) cordova.getActivity().getWindowManager().getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
+                                Display display = windowManager.getDefaultDisplay();
                                 Point size = new Point();
                                 display.getSize(size);
                                 int height = size.y;
 
-                                DisplayCutout cutout = display.getCutout();
-                                if(cutout!=null){
-                                    Rect topRect = cutout.getBoundingRectTop();
-                                    height -= topRect.height();
-                                }
-                                
+                                /*if (Build.VERSION.SDK_INT >= 29) {
+                                    DisplayCutout cutout = display.getCutout();
+                                    if(cutout!=null){
+                                        Rect topRect = cutout.getBoundingRectTop();
+                                        height -= topRect.height();
+                                    }
+                                }*/
+
                                 return height;
                             } else {
                                 return rootViewHeight;

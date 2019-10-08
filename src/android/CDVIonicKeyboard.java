@@ -151,21 +151,10 @@ public class CDVIonicKeyboard extends CordovaPlugin {
                         private int getScreenHeight() {
                             int rootViewHeight = rootView.getRootView().getHeight();
                             if (Build.VERSION.SDK_INT >= 21) {
-//                                Display display = cordova.getActivity().getWindowManager().getDefaultDisplay();
-                                WindowManager windowManager = (WindowManager) cordova.getActivity().getApplication().getSystemService(Context.WINDOW_SERVICE);
-                                Display display = windowManager.getDefaultDisplay();
+                                Display display = cordova.getActivity().getWindowManager().getDefaultDisplay();
                                 Point size = new Point();
                                 display.getSize(size);
                                 int height = size.y;
-
-                                /*if (Build.VERSION.SDK_INT >= 29) {
-                                    DisplayCutout cutout = display.getCutout();
-                                    if(cutout!=null){
-                                        Rect topRect = cutout.getBoundingRectTop();
-                                        height -= topRect.height();
-                                    }
-                                }*/
-
                                 return height;
                             } else {
                                 return rootViewHeight;

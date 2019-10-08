@@ -152,7 +152,7 @@ public class CDVIonicKeyboard extends CordovaPlugin {
                             int rootViewHeight = rootView.getRootView().getHeight();
                             if (Build.VERSION.SDK_INT >= 21) {
 //                                Display display = cordova.getActivity().getWindowManager().getDefaultDisplay();
-                                WindowManager windowManager = (WindowManager) cordova.getActivity().getWindowManager().getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
+                                WindowManager windowManager = (WindowManager) cordova.getActivity().getApplication().getSystemService(Context.WINDOW_SERVICE);
                                 Display display = windowManager.getDefaultDisplay();
                                 Point size = new Point();
                                 display.getSize(size);

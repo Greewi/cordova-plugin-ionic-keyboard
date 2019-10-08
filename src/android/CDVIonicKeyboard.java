@@ -22,6 +22,7 @@ import android.view.inputmethod.InputMethodManager;
 
 // import additionally required classes for calculating screen height
 import android.view.Display;
+import android.view.DisplayCutout;
 import android.graphics.Point;
 import android.os.Build;
 import android.widget.FrameLayout;
@@ -151,8 +152,16 @@ public class CDVIonicKeyboard extends CordovaPlugin {
                             if (Build.VERSION.SDK_INT >= 21) {
                                 Display display = cordova.getActivity().getWindowManager().getDefaultDisplay();
                                 Point size = new Point();
-                                display.getRealSize(size);
-                                return size.y;
+                                display.getSize(size);
+                                int height = size.y;
+
+                                DisplayCutout cutout = display.getCutout();
+                                if(cutout!=null){
+                                    Rect topRect = cutout.getBoundingRectTop();
+                                    height -= topRect.height();
+                                }
+                                
+                                return height;
                             } else {
                                 return rootViewHeight;
                             }

@@ -192,6 +192,7 @@ public class CDVIonicKeyboard extends CordovaPlugin {
                     mChildOfContent = content.getChildAt(0);
                     rootView.getViewTreeObserver().addOnGlobalLayoutListener(list);
                     frameLayoutParams = (FrameLayout.LayoutParams) mChildOfContent.getLayoutParams();
+                    list.onGlobalLayout(); // We fire it once to fix an immersive fullscreen bug on some devices
                     PluginResult dataResult = new PluginResult(PluginResult.Status.OK);
                     dataResult.setKeepCallback(true);
                     callbackContext.sendPluginResult(dataResult);

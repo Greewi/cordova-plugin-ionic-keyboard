@@ -14,9 +14,11 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.os.Build;
 import android.util.DisplayMetrics;
+import android.view.DisplayCutout;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
+import android.view.WindowInsets;
 import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
 
@@ -27,6 +29,8 @@ import android.view.WindowManager;
 import android.graphics.Point;
 import android.os.Build;
 import android.widget.FrameLayout;
+
+import java.util.List;
 
 public class CDVIonicKeyboard extends CordovaPlugin {
     private OnGlobalLayoutListener list;
@@ -101,13 +105,15 @@ public class CDVIonicKeyboard extends CordovaPlugin {
                             // calculate screen height differently for android versions >= 21: Lollipop 5.x, Marshmallow 6.x
                             //http://stackoverflow.com/a/29257533/3642890 beware of nexus 5
                             int screenHeight = getScreenHeight();
-                            int heightDiff = screenHeight - resultBottom;
+                            int topCutoutHeight = topCutoutHeight();
+                            int heightDiff = screenHeight + topCutoutHeight - resultBottom;
 
                             int pixelHeightDiff = (int)(heightDiff / density);
                             if (pixelHeightDiff > 100 && pixelHeightDiff != previousHeightDiff) { // if more than 100 pixels, its probably a keyboard...
                                 showNavigationBar();
                                 screenHeight = getScreenHeight();
-                                heightDiff = screenHeight - resultBottom;
+                                topCutoutHeight = topCutoutHeight();
+                                heightDiff = screenHeight + topCutoutHeight - resultBottom;
                                 pixelHeightDiff = (int)(heightDiff / density);
                                 String msg = "S" + Integer.toString(pixelHeightDiff);
                                 result = new PluginResult(PluginResult.Status.OK, msg);
@@ -117,7 +123,8 @@ public class CDVIonicKeyboard extends CordovaPlugin {
                             else if ( pixelHeightDiff != previousHeightDiff && ( previousHeightDiff - pixelHeightDiff ) > 100 ){
                                 hideNavigationBar();
                                 screenHeight = getScreenHeight();
-                                heightDiff = screenHeight - resultBottom;
+                                topCutoutHeight = topCutoutHeight();
+                                heightDiff = screenHeight + topCutoutHeight - resultBottom;
                                 pixelHeightDiff = (int)(heightDiff / density);
                                 String msg = "H";
                                 result = new PluginResult(PluginResult.Status.OK, msg);
@@ -186,6 +193,26 @@ public class CDVIonicKeyboard extends CordovaPlugin {
                                     | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
                                 window.getDecorView().setSystemUiVisibility(uiOptions);
                             }
+                        }
+
+                        private int topCutoutHeight() {
+                            View decorView = cordova.getActivity().getWindow().getDecorView();
+
+                            int cutOffHeight = 0;
+                            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
+                                WindowInsets windowInsets = decorView.getRootWindowInsets();
+                                DisplayCutout displayCutout = windowInsets.getDisplayCutout();
+                                if (displayCutout != null) {
+                                    List<Rect> list = displayCutout.getBoundingRects();
+                                    for (Rect rect : list) {
+                                        if (rect.top == 0) {
+                                            cutOffHeight += rect.bottom - rect.top;
+                                        }
+                                    }
+                                }
+
+                            }
+                            return cutOffHeight;
                         }
                     };
                     
